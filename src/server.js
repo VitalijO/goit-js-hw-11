@@ -3,7 +3,7 @@ const axios = require('axios').default;
 
 export default class ApiService{
   constructor() {
-    this.searchQuery = ' '
+    this.searchQuery = ''
     this.page = 1
   }
  

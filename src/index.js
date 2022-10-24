@@ -2,59 +2,59 @@ import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import ApiService from "./server.js";
 import Notiflix from 'notiflix';
+import throttle from "lodash.throttle";
+
  
 
-
+const DELAY = 300;
 const galleryEls = document.querySelector('.gallery'); 
 const newApiService = new ApiService();
 
 const refs = {
     searchForm: document.querySelector('#search-form'),
-    loadMore: document.querySelector('.load-more')
+  loadMore: document.querySelector('.load-more')
+  
 }
 
 refs.searchForm.addEventListener("submit", onSearch);
-refs.loadMore.addEventListener('click', onLoadMore)
+// refs.loadMore.addEventListener('click', onLoadMore)
  
 
 function onSearch(e) {
     e.preventDefault();
     
-   newApiService.querry = e.currentTarget.elements.searchQuery.value
+  newApiService.querry =  e.target.elements.searchQuery.value.trim()
    newApiService.resetPage()
    
-    newApiService.fetchPic().then(data => {
+  newApiService.fetchPic().then(data => {
+
+    if (newApiService.querry ==="" || data.data.total === 0 ) {
+      Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again."); 
+      return
+      }
+    else {
         Notiflix.Notify.info(`Hooray! We found ${data.data.total} images.`);
         destroyMarkup(galleryEls)
-        
+     }  
         
     const markupGaleryEls = createMarkupGalleryEls(data.data.hits) 
         galleryEls.insertAdjacentHTML('beforeend', markupGaleryEls)
         let lightbox = new SimpleLightbox('.gallery__item', {
            
         });
-         
-         
-
    })
 
 }
 function onLoadMore() {
-    newApiService.fetchPic().then(data => {
-       
-        const markupGaleryEls = createMarkupGalleryEls(data.data.hits) 
 
 
-        galleryEls.insertAdjacentHTML('beforeend', markupGaleryEls)
+  newApiService.fetchPic().then(data => {
 
-        let lightbox = new SimpleLightbox('.gallery__item');
-       
- 
-    })
-    
+  const markupGaleryEls = createMarkupGalleryEls(data.data.hits) 
+  galleryEls.insertAdjacentHTML('beforeend', markupGaleryEls)
+  let lightbox = new SimpleLightbox('.gallery__item');
+    }) 
 }
-
-
 
 function createMarkupGalleryEls(e) {
     return e.map(({ webformatURL, largeImageURL, tags, likes, views, comments,downloads }) => {
@@ -80,17 +80,31 @@ function createMarkupGalleryEls(e) {
     </p>
   </div>
 </div>
-  `    
-        })
-    .join('');
+  `
+})
+.join('');
 }
 
 function destroyMarkup(e) {
     e.innerHTML = "";
 }
 
+window.addEventListener("scroll", throttle(onLoadScroll, DELAY))
 
- 
+function onLoadScroll() {
+
+  const documentRctgl = document.documentElement.getBoundingClientRect()
+
+  window.scrollBy({ behavior: "smooth", });
+  
+  if (documentRctgl.bottom < document.documentElement.clientHeight + 400) {
+    onLoadMore()
+    
+     if(documentRctgl.bottom < document.documentElement.clientHeight+5 ) {
+   Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
+  }
+  }
+}
 
 
 
