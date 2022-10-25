@@ -15,11 +15,11 @@ export default class ApiService{
     //  return fetch(url)
     return axios.get(url)
       .then(r => r)
-       .then(data => {
-         this.incrementPage()
-         return data
+      .then(data => {
+        this.incrementPage()
+        return data
        }
-       ) 
+    ) 
   }
 
   incrementPage() {
@@ -37,5 +37,4 @@ export default class ApiService{
     this.searchQuery = newSearchQuery
   }
 }
-
 

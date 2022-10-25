@@ -6,7 +6,7 @@ import throttle from "lodash.throttle";
 
  
 
-const DELAY = 300;
+const DELAY = 500;
 const galleryEls = document.querySelector('.gallery'); 
 const newApiService = new ApiService();
 
@@ -34,7 +34,9 @@ function onSearch(e) {
       }
     else {
         Notiflix.Notify.info(`Hooray! We found ${data.data.total} images.`);
-        destroyMarkup(galleryEls)
+      destroyMarkup(galleryEls)
+      e.target.elements.searchQuery.value =""
+      
      }  
         
     const markupGaleryEls = createMarkupGalleryEls(data.data.hits) 
@@ -100,11 +102,10 @@ function onLoadScroll() {
   if (documentRctgl.bottom < document.documentElement.clientHeight + 400) {
     onLoadMore()
     
-     if(documentRctgl.bottom < document.documentElement.clientHeight+5 ) {
+     if(documentRctgl.bottom < document.documentElement.clientHeight ) {
    Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
   }
   }
 }
-
 
 
